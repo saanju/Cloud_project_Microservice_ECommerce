@@ -1,1 +1,1 @@
-kubernetes manifests docker images
+kubernetes manifests docker images compose
