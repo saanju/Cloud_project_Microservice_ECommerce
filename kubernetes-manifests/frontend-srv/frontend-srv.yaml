@@ -1,0 +1,35 @@
+# frontend-srv Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-srv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-srv
+  template:
+    metadata:
+      labels:
+        app: frontend-srv
+    spec:
+      containers:
+      - name: frontend-srv
+        image: sanj27/frontend-srv:latest
+        ports:
+        - containerPort: 5000
+
+---
+
+# frontend-srv Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-srv-service
+spec:
+  selector:
+    app: frontend-srv
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000

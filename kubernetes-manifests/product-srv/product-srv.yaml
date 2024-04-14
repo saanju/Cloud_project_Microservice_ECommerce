@@ -1,0 +1,35 @@
+# product-srv Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-srv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-srv
+  template:
+    metadata:
+      labels:
+        app: product-srv
+    spec:
+      containers:
+      - name: product-srv
+        image: sanj27/product-srv:latest
+        ports:
+        - containerPort: 5002
+
+---
+
+# product-srv Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-srv-service
+spec:
+  selector:
+    app: product-srv
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5002

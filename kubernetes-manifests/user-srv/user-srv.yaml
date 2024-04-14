@@ -1,0 +1,35 @@
+# user-srv Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-srv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-srv
+  template:
+    metadata:
+      labels:
+        app: user-srv
+    spec:
+      containers:
+      - name: user-srv
+        image: sanj27/user-srv:latest
+        ports:
+        - containerPort: 5001
+
+---
+
+# user-srv Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-srv-service
+spec:
+  selector:
+    app: user-srv
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5001

@@ -1,0 +1,35 @@
+# order-srv Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-srv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-srv
+  template:
+    metadata:
+      labels:
+        app: order-srv
+    spec:
+      containers:
+      - name: order-srv
+        image: sanj27/order-srv:latest
+        ports:
+        - containerPort: 5003
+
+---
+
+# order-srv Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-srv-service
+spec:
+  selector:
+    app: order-srv
+  ports:
+  - protocol: TCP
+    port: 5003
+    targetPort: 5003
