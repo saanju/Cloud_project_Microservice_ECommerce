@@ -1,6 +1,6 @@
 # run.py
 from application import create_app
-
+#to run this application,use run.py
 app = create_app()
 
 if __name__ == '__main__':
