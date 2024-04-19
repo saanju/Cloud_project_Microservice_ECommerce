@@ -95,8 +95,8 @@ pipeline {
                     sh '''
                         curl -i -d "name=cleansers&slug=cleansers&image=product4.jpg&price=100" -X POST localhost:5002/api/product/create
                         curl -i -d "name=perfume&slug=perfume&image=product5.jpg&price=200" -X POST localhost:5002/api/product/create
-                        mysql --host=127.0.0.1 --port=32000 --user=cloudacademy --password=pfm_2020 -e "show databases; use user; show tables; select * from user; exit"
-                        mysql --host=127.0.0.1 --port=32002 --user=cloudacademy --password=pfm_2020 -e "show databases; use order; show tables; select * from order.order; select * from order.order_item; exit"
+                        mysql --host=127.0.0.1 --port=32000 --user=ccproject --password=pfm_2020 -e "show databases; use user; show tables; select * from user; exit"
+                        mysql --host=127.0.0.1 --port=32002 --user=ccproject --password=pfm_2020 -e "show databases; use order; show tables; select * from order.order; select * from order.order_item; exit"
                     '''
                 }
             }
