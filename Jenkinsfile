@@ -1,53 +1,105 @@
 pipeline {
     agent any
 
-    tools {
-        dockerTool 'Docker' // Use the Docker tool configured in Jenkins
-    }
-
-    environment {
-        DOCKER_IMAGE = 'sanj27/user-srv:latest'
-        DOCKER_CONTAINER_NAME = 'user-srv-container'
-    }
-
     stages {
-        stage('Build') {
+        stage('Setup Docker Network') {
             steps {
                 script {
-                    // Build Docker image
-                    docker.build DOCKER_IMAGE
+                    echo 'Setting up Docker network...'
+                    sh 'docker network create micro_network'
                 }
             }
         }
-
-        stage('Deploy') {
+        stage('Build and Run Frontend Service') {
             steps {
                 script {
-                    // Run Docker container
-                    docker.run("--name ${DOCKER_CONTAINER_NAME} -p 8080:8080 ${DOCKER_IMAGE}")
+                    dir('frontend') {
+                        echo 'Building frontend service...'
+                        sh 'docker build -t frontend-srv .'
+                        echo 'Running frontend service...'
+                        sh 'docker run -p 5000:5000 --detach --name frontend-service --net=micro_network frontend-srv'
+                    }
                 }
             }
         }
-
-        stage('Test') {
+        stage('Build and Run Order Service') {
             steps {
                 script {
-                    // Run tests (replace this with actual test commands)
-                    echo 'Running tests...'
-                  
+                    dir('order-service') {
+                        echo 'Building order service...'
+                        sh 'docker build -t order-srv .'
+                        echo 'Running order service...'
+                        sh 'docker run -p 5003:5003 --detach --name order-service --net=micro_network order-srv'
+                    }
                 }
             }
         }
-
-      
-    }
-
-    post {
-        success {
-            echo 'Pipeline completed successfully!'
+        stage('Build and Run Product Service') {
+            steps {
+                script {
+                    dir('product-service') {
+                        echo 'Building product service...'
+                        sh 'docker build -t product-srv .'
+                        echo 'Running product service...'
+                        sh 'docker run -p 5002:5002 --detach --name product-service --net=micro_network product-srv'
+                    }
+                }
+            }
         }
-        failure {
-            echo 'Pipeline failed!'
+        stage('Build and Run User Service') {
+            steps {
+                script {
+                    dir('user-service') {
+                        echo 'Building user service...'
+                        sh 'docker build -t user-srv .'
+                        echo 'Running user service...'
+                        sh 'docker run -p 5001:5001 --detach --name user-service --net=micro_network user-srv'
+                    }
+                }
+            }
+        }
+        stage('Deploy Frontend') {
+            steps {
+                script {
+                    dir('frontend') {
+                        echo 'Building frontend...'
+                        sh 'docker-compose -f docker-compose.deploy.yml build'
+                        echo 'Deploying frontend...'
+                        sh 'docker-compose -f docker-compose.deploy.yml up -d'
+                    }
+                }
+            }
+        }
+        stage('Database Setup') {
+            steps {
+                script {
+                    echo 'Setting up databases...'
+                    sh '''
+                        docker exec -it corder-service flask db init
+                        docker exec -it corder-service flask db migrate
+                        docker exec -it corder-service flask db upgrade
+                        docker exec -it cproduct-service flask db init
+                        docker exec -it cproduct-service flask db migrate
+                        docker exec -it cproduct-service flask db upgrade
+                        docker exec -it cuser-service flask db init
+                        docker exec -it cuser-service flask db migrate
+                        docker exec -it cuser-service flask db upgrade
+                    '''
+                }
+            }
+        }
+        stage('Final Steps') {
+            steps {
+                script {
+                    echo 'Performing final steps...'
+                    sh '''
+                        curl -i -d "name=cleansers&slug=cleansers&image=product4.jpg&price=100" -X POST localhost:5002/api/product/create
+                        curl -i -d "name=perfume&slug=perfume&image=product5.jpg&price=200" -X POST localhost:5002/api/product/create
+                        mysql --host=127.0.0.1 --port=32000 --user=cloudacademy --password=pfm_2020 -e "show databases; use user; show tables; select * from user; exit"
+                        mysql --host=127.0.0.1 --port=32002 --user=cloudacademy --password=pfm_2020 -e "show databases; use order; show tables; select * from order.order; select * from order.order_item; exit"
+                    '''
+                }
+            }
         }
     }
 }
