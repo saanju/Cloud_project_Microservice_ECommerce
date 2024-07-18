@@ -1,0 +1,1 @@
+Strategically designed and developed a highly scalable E-commerce platform using microservices,microservice architecture based Databases,Docker, Kubernetes, REST APIs, Jenkins, and Flask achieving a 30% increase in system efficiency compared to a monolithic architecture.
